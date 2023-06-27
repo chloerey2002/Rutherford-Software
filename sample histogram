@@ -1,1 +1,40 @@
+import RPi.GPIO as GPIO
 import time
+
+#You can then access I2C from Python using the smbus library:
+import smbus
+DEVICE_BUS = 1
+DEVICE_ADDR = 0x15
+bus = smbus.SMBus(DEVICE_BUS)
+bus.write_byte_data(DEVICE_ADDR, 0x00, 0x01)
+#need to change parameters for each OLED screen
+
+#indicate whether we want to address the GPIOs via board numbers/via their GPIO number
+#Since we want the latter, the command is:
+GPIO.setmode(GPIO.BCM)
+
+#define the pin as output:
+GPIO.setup(23, GPIO.OUT)
+
+#This command says a voltage of 3.3V (HIGH) or 0V (LOW) should be applied.
+GPIO.output(23, GPIO.HIGH)
+GPIO.output(23, GPIO.LOW)
+
+#need an if/else statement to define that voltage is a hit, no volatge is a miss
+#the pin is defined as input:
+GPIO.setup(24, GPIO.IN)
+
+#Now we can query the status:
+#either output 0 (if button not pressed) or 1 (if button pressed).
+GPIO.input(24)
+
+#extend the program as follows, LED is always on when the button is pressed.
+
+# Infinite loop
+while True:
+    if GPIO.input(24) == 0:
+        # Turn off
+        GPIO.output(23, GPIO.LOW)
+    else:
+        # Turn on
+        GPIO.output(23, GPIO.HIGH)
