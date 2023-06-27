@@ -7,6 +7,7 @@ Created on Mon Jun 26 16:18:55 2023
 
 import RPi.GPIO as GPIO
 import time
+
 #indicate whether we want to address the GPIOs via board numbers/via their GPIO number
 #Since we want the latter, the command is:
 GPIO.setmode(GPIO.BCM)
@@ -42,7 +43,21 @@ while True:
     else:
         # Turn on
         GPIO.output(23, GPIO.HIGH)
-        
+
+#i2c output for GPIO
+
+#You can verify the address of connected I2C peripherals with a simple one-liner:
+sudo apt-get install i2c-tools
+sudo i2cdetect -y 1
+
+#You can then access I2C from Python using the smbus library:
+import smbus
+DEVICE_BUS = 1
+DEVICE_ADDR = 0x15
+bus = smbus.SMBus(DEVICE_BUS)
+bus.write_byte_data(DEVICE_ADDR, 0x00, 0x01)
+#GPIO 0 and GPIO 1 - I2C0 - can be used as an alternate I2C bus, but are typically used by the system to read the HAT EEPROM.
+
 #To take readings from sensors:
 # 1. Import the gpiozero library for Python
 # 2. Read from the connected sensor (directly, or by using SPI or I2C)
