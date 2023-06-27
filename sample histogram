@@ -1,3 +1,6 @@
+#defines input by hit/no-hit in which the input runs on an infinite loop; when input is 0, output is GPIO.LOW and otherwise, output is GPIO.HIGH aka 3.3V
+#this creates a flashing hit/no-hit signal which can then be put into a real-time histogram piece of code
+
 import RPi.GPIO as GPIO
 import time
 
