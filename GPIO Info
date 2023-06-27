@@ -132,8 +132,19 @@ finally:
 
 #chatgpt code for inputting data
 
+import RPi.GPIO as GPIO
+import time
 import matplotlib.pyplot as plt
-import numpy as np
+
+# GPIO pin connected to the sensor
+sensor_pin = 17
+
+# Set up GPIO
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(sensor_pin, GPIO.IN)
+
+# Initialize an empty list to store the sensor readings
+data = []
 
 # Create an initial empty histogram
 fig, ax = plt.subplots()
@@ -156,10 +167,18 @@ def update_histogram(data):
     plt.draw()
     plt.pause(0.001)
 
-# Example usage: continuously add new data to the histogram
+# Example usage: continuously read sensor data and update the histogram
 while True:
-    # Generate random data
-    new_data = np.random.normal(loc=0, scale=1, size=100)
+    # Read the sensor value
+    sensor_value = GPIO.input(sensor_pin)
+    
+    # Append the sensor value to the data list
+    data.append(sensor_value)
     
     # Update the histogram
-    update_histogram(new_data)
+    update_histogram(data)
+    
+    # Pause for a short duration
+    time.sleep(0.1)
+
+   
