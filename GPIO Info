@@ -180,5 +180,8 @@ while True:
     
     # Pause for a short duration
     time.sleep(0.1)
-
-   
+#Make sure you have the RPi.GPIO library installed on your Raspberry Pi. 
+#If it's not already installed, you can install it by running pip install RPi.GPIO in the terminal on your Raspberry Pi.
+#Also, ensure that you have the necessary privileges to access the GPIO pins on the Raspberry Pi. 
+#You may need to run the code as a privileged user or add your user to the gpio group 
+#using the sudo adduser <username> gpio command, replacing <username> with your actual username.
