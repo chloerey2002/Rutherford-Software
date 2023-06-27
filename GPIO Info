@@ -128,3 +128,38 @@ except KeyboardInterrupt:
     pass
 finally:
     GPIO.cleanup()
+
+
+#chatgpt code for inputting data
+
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Create an initial empty histogram
+fig, ax = plt.subplots()
+n, bins, patches = ax.hist([], bins=10)
+
+# Function to update the histogram with new data
+def update_histogram(data):
+    # Clear the previous histogram
+    ax.cla()
+    
+    # Create a new histogram with the updated data
+    n, bins, patches = ax.hist(data, bins=10)
+    
+    # Set labels and title
+    ax.set_xlabel('Value')
+    ax.set_ylabel('Frequency')
+    ax.set_title('Real-time Histogram')
+    
+    # Refresh the plot
+    plt.draw()
+    plt.pause(0.001)
+
+# Example usage: continuously add new data to the histogram
+while True:
+    # Generate random data
+    new_data = np.random.normal(loc=0, scale=1, size=100)
+    
+    # Update the histogram
+    update_histogram(new_data)
