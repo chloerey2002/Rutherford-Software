@@ -42,3 +42,10 @@ while True:
     else:
         # Turn on
         GPIO.output(23, GPIO.HIGH)
+
+#now onto the histogram code
+#You can define the bins by using the bins= argument. This accepts either a number (for number of bins) or a list (for specific bins).
+#an example with age and sets of years
+
+plt.hist(df['Age'], bins=[0,5,10,15,20,25,35,40,45,50], align='right', color='purple', edgecolor='black')
+
