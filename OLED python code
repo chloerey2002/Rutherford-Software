@@ -1,0 +1,33 @@
+#in your terminal install sudo pip install Adafruit-SSD1306
+
+#layout for GPIO pins:
+#OLED VCC  -> Raspberry Pi 3.3V
+#OLED GND  -> Raspberry Pi GND
+#OLED SDA  -> Raspberry Pi SDA (GPIO2)
+#OLED SCL  -> Raspberry Pi SCL (GPIO3)
+
+import Adafruit_SSD1306
+from PIL import Image, ImageDraw, ImageFont
+
+# OLED screen configuration
+OLED_WIDTH = 128
+OLED_HEIGHT = 32
+OLED_I2C_ADDRESS = 0x3C
+
+# Initialize OLED library and screen
+oled = Adafruit_SSD1306.SSD1306_128_32(rst=None)
+oled.begin()
+oled.clear()
+oled.display()
+
+# Create an image buffer for the screen
+image = Image.new('1', (OLED_WIDTH, OLED_HEIGHT))
+draw = ImageDraw.Draw(image)
+
+# Load a font
+font = ImageFont.load_default()
+
+# Display text on the screen
+draw.text((0, 0), 'Hello, World!', font=font, fill=255)
+oled.image(image)
+oled.display()
