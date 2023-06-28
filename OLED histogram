@@ -1,0 +1,46 @@
+import Adafruit_SSD1306
+import numpy as np
+from PIL import Image, ImageDraw
+
+# OLED screen configuration
+OLED_WIDTH = 128
+OLED_HEIGHT = 32
+OLED_I2C_ADDRESS = 0x3C
+
+# Initialize OLED library and screen
+oled = Adafruit_SSD1306.SSD1306_128_32(rst=None)
+oled.begin()
+oled.clear()
+oled.display()
+
+# Create an image buffer for the screen
+image = Image.new('1', (OLED_WIDTH, OLED_HEIGHT))
+draw = ImageDraw.Draw(image)
+
+def generate_histogram(data, bins):
+    hist, _ = np.histogram(data, bins=bins)
+    return hist
+
+def draw_histogram(hist):
+    max_height = OLED_HEIGHT - 2  # Leave some space for axis labels
+    max_value = max(hist)
+    
+    # Clear the screen
+    draw.rectangle((0, 0, OLED_WIDTH, OLED_HEIGHT), outline=0, fill=0)
+    
+    # Draw the histogram bars
+    bar_width = OLED_WIDTH // len(hist)
+    for i, value in enumerate(hist):
+        bar_height = int(value * max_height / max_value)
+        x = i * bar_width
+        y = OLED_HEIGHT - bar_height
+        draw.rectangle((x, y, x + bar_width - 1, OLED_HEIGHT - 1), outline=255, fill=255)
+    
+    # Update the OLED screen
+    oled.image(image)
+    oled.display()
+
+# Example usage: Display a histogram on the OLED screen
+data = np.random.normal(loc=0, scale=1, size=1000)
+histogram = generate_histogram(data, bins=10)
+draw_histogram(histogram)
