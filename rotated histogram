@@ -1,0 +1,30 @@
+import Adafruit_SSD1306
+from PIL import Image, ImageDraw, ImageFont
+
+# OLED screen configuration
+OLED_WIDTH = 128
+OLED_HEIGHT = 32
+OLED_I2C_ADDRESS = 0x3C
+
+# Initialize OLED library and screen
+oled = Adafruit_SSD1306.SSD1306_128_32(rst=None, i2c_address=OLED_I2C_ADDRESS)
+oled.begin()
+oled.clear()
+oled.display()
+
+# Create an image buffer for the screen
+image = Image.new('1', (OLED_WIDTH, OLED_HEIGHT))
+draw = ImageDraw.Draw(image)
+
+# Load a font
+font = ImageFont.load_default()
+
+# Generate and display histogram
+# (Assuming you have the histogram code here)
+
+# Rotate the image by 90 degrees
+rotated_image = image.transpose(Image.ROTATE_90)
+
+# Display the rotated image on the OLED screen
+oled.image(rotated_image)
+oled.display()
