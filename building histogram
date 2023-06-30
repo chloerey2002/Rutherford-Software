@@ -1,0 +1,32 @@
+import RPi.GPIO as GPIO
+import matplotlib.pyplot as plt
+
+# Set up GPIO
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(24, GPIO.IN)
+
+# Collect input data
+data = []
+prev_input = GPIO.LOW
+
+while True:
+    input_state = GPIO.input(24)
+
+    if input_state != prev_input:
+        if input_state == GPIO.HIGH:
+            data.append(1)  # Button press
+        else:
+            data.append(0)  # Button release
+
+    prev_input = input_state
+
+    if len(data) >= 1000:  # Collect 1000 samples
+        break
+
+# Create histogram
+plt.hist(data, bins=2)  # Two bins for button press and release
+plt.xlabel('Button State')
+plt.ylabel('Frequency')
+plt.title('Button Press Histogram')
+plt.xticks([0.25, 0.75], ['Release', 'Press'])
+plt.show()
