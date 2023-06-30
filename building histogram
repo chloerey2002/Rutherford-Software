@@ -1,32 +1,36 @@
 import RPi.GPIO as GPIO
 import matplotlib.pyplot as plt
+from matplotlib.animation import FuncAnimation
 
 # Set up GPIO
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(24, GPIO.IN)
 
-# Collect input data
-data = []
-prev_input = GPIO.LOW
+# Initialize data
+data = {'press': 0, 'release': 0}
 
-while True:
+# Create figure and axis
+fig, ax = plt.subplots()
+rects = ax.bar(data.keys(), data.values())
+
+# Update function for animation
+def update(frame):
     input_state = GPIO.input(24)
+    
+    if input_state == GPIO.HIGH:
+        data['press'] += 1
+    else:
+        data['release'] += 1
 
-    if input_state != prev_input:
-        if input_state == GPIO.HIGH:
-            data.append(1)  # Button press
-        else:
-            data.append(0)  # Button release
+    # Update the heights of the bars
+    for rect, value in zip(rects, data.values()):
+        rect.set_height(value)
 
-    prev_input = input_state
+    # Set the title
+    ax.set_title('Button Press Histogram')
 
-    if len(data) >= 1000:  # Collect 1000 samples
-        break
+# Set up the animation
+ani = FuncAnimation(fig, update, interval=200)
 
-# Create histogram
-plt.hist(data, bins=2)  # Two bins for button press and release
-plt.xlabel('Button State')
-plt.ylabel('Frequency')
-plt.title('Button Press Histogram')
-plt.xticks([0.25, 0.75], ['Release', 'Press'])
+# Display the plot
 plt.show()
