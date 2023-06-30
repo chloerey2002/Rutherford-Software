@@ -1,11 +1,12 @@
 
-from gpiozero import Button, LED
-from signal import pause
+from gpiozero import Button
 
-led = LED(14)
-button = Button(4)
+# Connect the button to GPIO pin 17
+button = Button(17)
 
-button.when_pressed = led.on
-button.when_released = led.off
+while True:
+    if button.is_pressed:
+        print("1")
+    else:
+        print("0")
 
-pause()
