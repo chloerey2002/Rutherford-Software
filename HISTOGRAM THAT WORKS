@@ -1,0 +1,55 @@
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+import RPi.GPIO as GPIO
+
+
+plt.style.use('seaborn')
+
+# Constants
+HIST_BINS = np.linspace(-4, 4, 100)
+data = np.zeros(1000)
+n, _ = np.histogram(data, HIST_BINS)
+
+# GPIO setup
+GPIO.setmode(GPIO.BCM)
+button_pin = 17
+GPIO.setup(button_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+
+
+# Function to increment histogram bin on button press
+def button_pressed_callback(channel):
+    # Increment a random bin of the histogram
+    random_bin = np.random.randint(0, len(n))
+    n[random_bin] += 1
+    print(f"Button pressed! Histogram bin {random_bin} incremented.")
+  #  update_histogram()
+
+
+
+# Prepare animation
+def prepare_animation(bar_container):
+    def animate(frame_number):
+        for count, rect in zip(n, bar_container.patches):
+            rect.set_height(count)
+        return bar_container.patches
+    return animate
+
+# Update the histogram
+def update_histogram():
+    fig.canvas.draw()
+
+# Set up figure and histogram
+fig, ax = plt.subplots()
+_, _, bar_container = ax.hist(data, HIST_BINS, lw=1, ec="blue", fc="yellow", alpha=0.5)
+ax.set_ylim(top=100)
+
+# Add event detection for button press
+GPIO.add_event_detect(button_pin, GPIO.FALLING, callback=button_pressed_callback, bouncetime=300)
+
+# Create animation
+ani = animation.FuncAnimation(fig, prepare_animation(bar_container), 50, repeat=True, blit=True)
+
+
+# Show the figure
+plt.show()
