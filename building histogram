@@ -65,3 +65,40 @@ _, _, bar_container = ax.hist(data, HIST_BINS, lw=1,ec="blue", fc="yellow", alph
 ax.set_ylim(top=100)
 ani = animation.FuncAnimation(fig, prepare_animation(bar_container), 50,repeat=True, blit=True)
 HTML(ani.to_html5_video())
+
+#new code
+import RPi.GPIO as GPIO
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+from IPython.display import HTML
+
+# Set up GPIO
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(24, GPIO.IN)
+
+HIST_BINS = np.linspace(-4, 4, 100)
+data = np.random.randn(1000)  # Initial dummy data
+n, _ = np.histogram(data, HIST_BINS)
+
+def prepare_animation(bar_container):
+    def animate(frame_number):
+        input_state = GPIO.input(24)
+        
+        if input_state == GPIO.HIGH:
+            data = np.random.randn(1000)  # Replace with your data acquisition logic
+            n, _ = np.histogram(data, HIST_BINS)
+            
+            for count, rect in zip(n, bar_container.patches):
+                rect.set_height(count)
+
+        return bar_container.patches
+    
+    return animate
+
+fig, ax = plt.subplots()
+_, _, bar_container = ax.hist(data, HIST_BINS, lw=1, ec="blue", fc="yellow", alpha=0.5)
+ax.set_ylim(top=100)
+ani = animation.FuncAnimation(fig, prepare_animation(bar_container), frames=50, repeat=True, blit=True)
+HTML(ani.to_html5_video())
+
