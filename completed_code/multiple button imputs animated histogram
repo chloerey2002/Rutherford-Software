@@ -13,7 +13,7 @@ n, _ = np.histogram(data, HIST_BINS)
 # GPIO setup
 GPIO.setmode(GPIO.BCM)
 button_pin_1 = 17
-button_pin_2 = 18
+button_pin_2 = 16
 GPIO.setup(button_pin_1, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 GPIO.setup(button_pin_2, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
@@ -29,7 +29,7 @@ def button_pressed_callback(channel):
 
     n[bin_index] += 1
     print(f"Button pressed! Histogram bin {bin_index} incremented.")
-    update_histogram()
+   # update_histogram()
 
 
 # Prepare animation
