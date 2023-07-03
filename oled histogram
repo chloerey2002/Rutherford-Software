@@ -1,0 +1,59 @@
+import numpy as np
+import RPi.GPIO as GPIO
+import Adafruit_GPIO.SPI as SPI
+import Adafruit_SSD1306
+from PIL import Image, ImageDraw
+
+# Constants
+HIST_BINS = np.linspace(-4, 4, 100)
+data = np.zeros(1000)
+n, _ = np.histogram(data, HIST_BINS)
+
+# GPIO setup
+GPIO.setmode(GPIO.BCM)
+button_pin = 18
+GPIO.setup(button_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+
+# OLED setup
+RST = None  # RST pin not connected
+I2C_ADDR = 0x3C  # I2C address of the OLED display
+disp = Adafruit_SSD1306.SSD1306_128_64(rst=RST, i2c_address=I2C_ADDR)
+disp.begin()
+disp.clear()
+disp.display()
+
+# Function to increment histogram bin on button press
+def button_pressed_callback(channel):
+    # Increment a random bin of the histogram
+    random_bin = np.random.randint(0, len(n))
+    n[random_bin] += 1
+    print(f"Button pressed! Histogram bin {random_bin} incremented.")
+    update_histogram()
+
+# Prepare histogram image
+hist_image = Image.new('1', (disp.width, disp.height))
+draw = ImageDraw.Draw(hist_image)
+
+# Function to update the histogram
+def update_histogram():
+    draw.rectangle((0, 0, disp.width, disp.height), outline=0, fill=0)
+    max_count = max(n)
+    bar_width = disp.width // len(n)
+    for i, count in enumerate(n):
+        bar_height = disp.height * count // max_count
+        draw.rectangle((i * bar_width, disp.height - bar_height, (i + 1) * bar_width - 1, disp.height - 1), fill=255)
+    disp.image(hist_image)
+    disp.display()
+
+# Add event detection for button press
+GPIO.add_event_detect(button_pin, GPIO.FALLING, callback=button_pressed_callback, bouncetime=300)
+
+# Initial histogram update
+update_histogram()
+
+# Main loop
+try:
+    while True:
+        pass
+except KeyboardInterrupt:
+    GPIO.cleanup()
