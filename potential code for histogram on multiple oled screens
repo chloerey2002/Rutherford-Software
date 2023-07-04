@@ -1,0 +1,89 @@
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+import RPi.GPIO as GPIO
+import Adafruit_GPIO.SPI as SPI
+import Adafruit_SSD1306
+
+plt.style.use('seaborn')
+
+# Constants
+HIST_BINS = np.array([0, 1, 2])
+data = np.zeros(0)
+n, _ = np.histogram(data, HIST_BINS)
+
+# GPIO setup
+GPIO.setmode(GPIO.BCM)
+button_pin_1 = 17
+button_pin_2 = 16
+GPIO.setup(button_pin_1, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+GPIO.setup(button_pin_2, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+
+# OLED display setup
+RST = None  # RST pin not connected
+I2C_ADDR = 0x3C  # I2C address of the OLED display
+disp = Adafruit_SSD1306.SSD1306_128_64(rst=RST, i2c_address=I2C_ADDR)
+disp.begin()
+
+# Function to update the OLED display
+def update_display():
+    # Clear the display
+    disp.clear()
+
+    # Create an image for the histogram
+    hist_image = np.zeros((disp.width, disp.height), dtype=np.uint8)
+    hist_bins_scaled = np.interp(n, [0, np.max(n)], [0, disp.height])
+
+    # Draw the histogram bars on the image
+    for i in range(len(hist_bins_scaled)):
+        bar_height = int(hist_bins_scaled[i])
+        hist_image[:, i] = np.where(np.arange(disp.height) < bar_height, 255, 0)
+
+    # Create PIL image from NumPy array
+    image = Image.fromarray(hist_image).transpose(Image.TRANSPOSE)
+
+    # Display the image on the OLED
+    disp.image(image)
+    disp.display()
+
+# Function to increment histogram bin on button press
+def button_pressed_callback(channel):
+    if channel == button_pin_1:
+        bin_index = 0
+    elif channel == button_pin_2:
+        bin_index = 1
+    else:
+        return
+
+    n[bin_index] += 1
+    print(f"Button pressed! Histogram bin {bin_index} incremented.")
+    update_display()
+
+# Prepare animation
+def prepare_animation(bar_container):
+    def animate(frame_number):
+        for count, rect in zip(n, bar_container.patches):
+            rect.set_height(count)
+        return bar_container.patches
+    return animate
+
+# Update the histogram
+def update_histogram():
+    fig.canvas.draw()
+    update_display()
+
+# Set up figure and histogram
+fig, ax = plt.subplots()
+_, _, bar_container = ax.hist(data, HIST_BINS, lw=1, ec="blue", fc="yellow", alpha=0.5)
+ax.set_ylim(top=500)
+
+# Add event detection for button presses
+GPIO.add_event_detect(button_pin_1, GPIO.FALLING, callback=button_pressed_callback, bouncetime=300)
+GPIO.add_event_detect(button_pin_2, GPIO.FALLING, callback=button_pressed_callback, bouncetime=300)
+
+# Create animation
+ani = animation.FuncAnimation(fig, prepare_animation(bar_container), 50, repeat=True, blit=True)
+
+# Show the figure and start updating the OLED display
+plt.show()
+update_display()
