@@ -1,0 +1,46 @@
+import RPi.GPIO as GPIO
+import time
+from prometheus_client import start_http_server, Counter
+
+# Create a Prometheus Counter for button presses with 'button' label
+button_presses = Counter('button_presses', 'Button Press Histogram', ['button'])
+
+def button_callback(channel):
+    global button_pin_1, button_pin_2
+    # Determine which button was pressed based on the GPIO pin number
+    if channel == button_pin_1:
+        button = 'button_1'
+    elif channel == button_pin_2:
+        button = 'button_2'
+    else:
+        return
+
+    # Increment the appropriate counter for the corresponding button
+    button_presses.labels(button).inc()
+
+def main():
+    global button_pin_1, button_pin_2
+    # Configure GPIO pin numbers
+    button_pin_1 = 17
+    button_pin_2 = 18
+
+    # Setup GPIO mode and input pins
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setup(button_pin_1, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+    GPIO.setup(button_pin_2, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+
+    # Register button callbacks
+    GPIO.add_event_detect(button_pin_1, GPIO.FALLING, callback=button_callback, bouncetime=200)
+    GPIO.add_event_detect(button_pin_2, GPIO.FALLING, callback=button_callback, bouncetime=200)
+
+    # Start Prometheus metrics server
+    start_http_server(8000)
+
+    try:
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        GPIO.cleanup()
+
+if __name__ == '__main__':
+    main()
