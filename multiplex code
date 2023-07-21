@@ -1,0 +1,119 @@
+import smbus
+
+class piSO:
+    def __init__(self,bus=1,muxAddress=0x77):
+        self.bus=smbus.SMBus(bus)
+        self.muxAddress=muxAddress
+
+        # Mapping & Commands
+        # 0 -> Header J2 -> Driver U4 -> DACB -> 0x19
+        # 1 -> Header J3 -> Driver U5 -> DACD -> 0x1b
+        # 2 -> Header J4 -> Driver U6 -> DACC -> 0x1a
+        # 3 -> Header J5 -> Driver U7 -> DACA -> 0x18
+        self.dacCmd=[0x19, 0x1b, 0x1a, 0x18, 0x1f]
+
+        # Port Expander Mapping & Commands
+        # U4 status -> IO7
+        # U4 enable -> IO6
+        # U5 status -> IO5
+        # U5 enable -> IO4
+        # U6 status -> IO3
+        # U6 enable -> IO2
+        # U7 status -> IO1
+        # U7 enable -> IO0s
+
+
+        self.statusBit=[0x80,0x20,0x08,0x02]
+        self.enableBit=[0x40,0x10,0x04,0x01]
+
+        # setup PCA9544 I2C MUX 
+        self.bus.write_byte_data(self.muxAddress,0x04,0x04)
+
+	# configure AD5625 for internal VREF
+        enableRef = [0x00,0x01]
+       	self.bus.write_i2c_block_data(0x1a,0x38,enableRef)
+
+	# configure PCA9554 direction
+        self.bus.write_byte_data(0x20,0x03,0xaa)
+         
+	# configure PCA9554 polarity
+        self.bus.write_byte_data(0x20,0x02,0x00)
+         
+        # clear PCA9544 I2C MUX
+        self.bus.write_byte_data(self.muxAddress,0x04,0x00)
+
+    def writeDACraw(self,channel,dac_value):
+
+        dac_bits=[]
+        dac_bits.append( ( int(dac_value) & 0x0ff0) >> 4)
+        dac_bits.append( ( int(dac_value) & 0x000f) << 4)
+
+        # setup I2C MUX 
+        self.bus.write_byte_data(self.muxAddress,0x04,0x04)
+
+        # write to DAC 
+       	self.bus.write_i2c_block_data(0x1a,self.dacCmd[channel],dac_bits)
+
+        # clear I2Cs
+        self.bus.write_byte_data(self.muxAddress,0x04,0x00)
+        return
+
+    def setPWM(self,channel,percent):
+
+        # 1.50V -> 10%
+        # 3.56V -> 90%
+        if(percent < 10):
+            percent = 10
+        elif(percent > 90):
+            percent = 90
+        voltage = 1.5 + ( (percent-10) * (2.06/80) )
+
+	#  Vout = Vref x bits/4095
+        value = 4095 * (voltage / 5.0)
+
+        print("Channel ",channel," set to ",voltage,"V ",value," for PWM ",percent,"%")
+        self.writeDACraw(channel,value)
+        return
+
+    def setDriver(self,channel,state):
+
+        # setup I2C MUX 
+        self.bus.write_byte_data(self.muxAddress,0x04,0x04)
+
+        # read output register
+        value = self.bus.read_byte_data(0x20,0x00)
+
+        # flip the bit
+        if(state == 1):
+            value |= self.enableBit[channel]
+        else:
+            value &= (~self.enableBit[channel])
+
+	# write PCA9554 output regsiter
+        self.bus.write_byte_data(0x20,0x01,value)
+
+        # clear I2C MUX
+        self.bus.write_byte_data(self.muxAddress,0x04,0x00)
+        return
+
+    def disableDriver(self,channel):
+        setDriver(channel,0)
+        return
+
+    def enableDriver(self,channel):
+        setDriver(channel,1)
+        return
+
+if __name__=="__main__":
+
+    piso = piSO()
+
+    piso.setPWM(0,10)
+    piso.setPWM(1,30)
+    piso.setPWM(2,70)
+    piso.setPWM(3,90)
+
+    piso.setDriver(0,0)
+    piso.setDriver(1,0)
+    piso.setDriver(2,0)
+    piso.setDriver(3,0)
