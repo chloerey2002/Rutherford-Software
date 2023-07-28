@@ -1,6 +1,29 @@
 import smbus
 import time
 
+class piSO:
+    def __init__(self,bus=1,muxAddress=0x77):
+        self.bus=smbus.SMBus(bus)
+        self.muxAddress=muxAddress
+    self.statusBit=[0x80,0x20,0x08,0x02]
+        self.enableBit=[0x40,0x10,0x04,0x01]
+
+    # setup PCA9544 I2C MUX 
+    self.bus.write_byte_data(self.muxAddress,0x04,0x04)
+
+	# configure AD5625 for internal VREF
+    enableRef = [0x00,0x01]
+    self.bus.write_i2c_block_data(0x1a,0x38,enableRef)
+
+	# configure PCA9554 direction
+    self.bus.write_byte_data(0x20,0x03,0xaa)
+         
+	# configure PCA9554 polarity
+    self.bus.write_byte_data(0x20,0x02,0x00)
+         
+    # clear PCA9544 I2C MUX
+    self.bus.write_byte_data(self.muxAddress,0x04,0x00)
+
 # Define the I2C address of the OLED screen
 I2C_ADDRESS = 0x3C  # Replace with the I2C address of your OLED screen
 
