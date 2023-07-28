@@ -1,0 +1,54 @@
+import smbus
+import time
+
+# Define the I2C address of the OLED screen
+I2C_ADDRESS = 0x3C  # Replace with the I2C address of your OLED screen
+
+# Initialize the I2C bus
+bus = smbus.SMBus(1)  # For Raspberry Pi 2 and later, use bus number 1
+
+# OLED commands
+CMD_DISPLAY_OFF = 0xAE
+CMD_DISPLAY_ON = 0xAF
+CMD_SET_DISPLAY_START_LINE = 0x40
+CMD_SET_PAGE_ADDRESS = 0xB0
+CMD_SET_COLUMN_ADDRESS_LOW = 0x00
+CMD_SET_COLUMN_ADDRESS_HIGH = 0x10
+
+# Function to send commands to the OLED
+def send_command(command):
+    bus.write_byte_data(I2C_ADDRESS, 0x00, command)
+
+# Function to initialize the OLED
+def init_oled():
+    send_command(CMD_DISPLAY_OFF)
+    send_command(CMD_SET_DISPLAY_START_LINE)
+    send_command(CMD_SET_PAGE_ADDRESS)
+    send_command(CMD_SET_COLUMN_ADDRESS_LOW)
+    send_command(CMD_SET_COLUMN_ADDRESS_HIGH)
+    send_command(CMD_DISPLAY_ON)
+
+# Function to display text on the OLED
+def display_text(text):
+    # Your code to display the text on the OLED screen here
+    # Make use of the smbus library to communicate with the OLED
+
+if __name__ == "__main__":
+    try:
+        # Initialize the OLED
+        init_oled()
+
+        # Example: Display text on the OLED
+        display_text("Hello, OLED!")
+
+        # Add any other logic or data retrieval to be displayed on the OLED
+        # For example, if you have sensor data, you can update the display accordingly.
+
+        while True:
+            # Your code here to update the OLED display based on the data from the Raspberry Pi and multiplex board
+            # Example: Read data from sensors, process the data, and update the display using display_text function
+            time.sleep(1)  # Adjust the sleep duration as per your requirements
+
+    except KeyboardInterrupt:
+        # Clean up and close the I2C bus on program exit
+        bus.close()
