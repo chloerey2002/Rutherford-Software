@@ -1,0 +1,30 @@
+import RPi.GPIO as GPIO
+import time
+
+# Set the GPIO mode and the pin number
+GPIO.setmode(GPIO.BOARD)
+sensor_pin = 11  # Change this to the GPIO pin number where the sensor is connected
+
+# Set up the GPIO pin as an input
+GPIO.setup(sensor_pin, GPIO.IN)
+
+def detect_alpha_particle():
+    # Read the voltage value from the sensor
+    voltage = GPIO.input(sensor_pin)
+
+    # Convert voltage to a corresponding value (0 or 1)
+    is_uncovered = 1 if voltage > 0.5 else 0
+
+    if is_uncovered:
+        print('Alpha particle detected')
+    else:
+        print('Sensor covered')
+
+try:
+    while True:
+        detect_alpha_particle()
+        time.sleep(1)  # Wait for 1 second before checking again
+
+except KeyboardInterrupt:
+    # Clean up on program exit
+    GPIO.cleanup()
