@@ -1,0 +1,30 @@
+import RPi.GPIO as GPIO
+import time
+
+GPIO.setmode(GPIO.BCM)
+sensor_pin = 17
+
+GPIO.setup(sensor_pin, GPIO.IN)
+
+def detect_alpha_particle():
+    voltage = GPIO.input(sensor_pin)
+
+    # Measure and print the actual voltage for calibration
+    print("Voltage: {:.2f}V".format(voltage))
+
+    # Adjust these thresholds based on the measured values
+    threshold_covered = 0.4
+    threshold_uncovered = 0.7
+
+    if voltage < threshold_covered:
+        print('Alpha particle detected')
+    else:
+        print('Sensor covered')
+
+try:
+    while True:
+        detect_alpha_particle()
+        time.sleep(1)
+
+except KeyboardInterrupt:
+    GPIO.cleanup()
