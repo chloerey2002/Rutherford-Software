@@ -1,0 +1,47 @@
+import json
+
+def categorize_data(data, threshold):
+    categorized_data = []
+
+    for array in data:
+        categorized_array = []
+        for value in array:
+            if value > threshold:
+                categorized_array.append("hit")
+            else:
+                categorized_array.append("no-hit")
+        categorized_data.append(categorized_array)
+
+    return categorized_data
+
+def count_hits_no_hits(categorized_data):
+    total_hits = 0
+    total_no_hits = 0
+
+    for array in categorized_data:
+        total_hits += array.count("hit")
+        total_no_hits += array.count("no-hit")
+
+    return total_hits, total_no_hits
+
+def main():
+    # Read data from the .json file
+    with open("JohnDoe_0_NoiseMap-0.json", "r") as json_file:
+        json_data = json.load(json_file)
+
+    data_arrays = json_data["Data"]
+
+    threshold = 200
+
+    # Categorize the data arrays based on the threshold
+    categorized_data = categorize_data(data_arrays, threshold)
+
+    # Count the total hits and no-hits
+    total_hits, total_no_hits = count_hits_no_hits(categorized_data)
+
+    # Print the results
+    print("Total Hits: {}".format(total_hits))
+    print("Total No Hits: {}".format(total_no_hits))
+
+if __name__ == "__main__":
+    main()
