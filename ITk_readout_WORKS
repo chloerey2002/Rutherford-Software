@@ -1,0 +1,37 @@
+import json
+
+
+def categorize_data(data, threshold):
+    categorized_data = []
+
+    for array in data:
+        categorized_array = []
+        for value in array:
+            if value > threshold:
+                categorized_array.append("hit")
+            else:
+                categorized_array.append("no-hit")
+        categorized_data.append(categorized_array)
+
+    return categorized_data
+
+def main():
+    # Read data from the .json file
+    with open("JohnDoe_0_NoiseMap-0.json", "r") as json_file:
+        json_data = json.load(json_file)
+
+    data_arrays = json_data["Data"]
+
+    threshold = 200
+
+    # Categorize the data based on the threshold
+    categorized_data = categorize_data(data_arrays, threshold)
+
+    # Print the results
+    for i, array in enumerate(data_arrays):
+        for j, value in enumerate(array):
+            category = categorized_data[i][j]
+            print("Data point {}-{}: {} -> {}".format(i + 1, j + 1, value, categorized_data[i][j]))
+
+if __name__ == "__main__":
+    main()
