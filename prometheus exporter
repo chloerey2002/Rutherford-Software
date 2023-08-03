@@ -1,0 +1,27 @@
+from prometheus_client import start_http_server, Gauge
+import time
+
+# Your code to extract the numbers and store them in variables or lists
+# For example:
+# num1 = ...
+# num2 = ...
+
+# Define Prometheus metrics
+gauge_num1 = Gauge('my_custom_metric_num1', 'Description of metric num1')
+gauge_num2 = Gauge('my_custom_metric_num2', 'Description of metric num2')
+
+# Function to update metrics
+def update_metrics():
+    # Update Prometheus metrics with the extracted numbers
+    # Replace `num1` and `num2` with the actual variables containing your numbers
+    gauge_num1.set(num1)
+    gauge_num2.set(num2)
+
+if __name__ == '__main__':
+    # Start the Prometheus server on port 8000
+    start_http_server(8000)
+
+    while True:
+        # Periodically update the metrics
+        update_metrics()
+        time.sleep(10)  # Update every 10 seconds
